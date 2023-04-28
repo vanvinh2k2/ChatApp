@@ -61,7 +61,7 @@
             <div class="chat-box-sent" id ="chat-box-sent" style="display: none">     
             </div>   
         </div>
-        <form action="#" id="myform" method="POST">
+        <form action="" id="myform" method="POST">
             {% csrf_token %}
             {{ form.body }}
             <button type = "submit" id = "submit">Send</button>
@@ -71,13 +71,32 @@
 
 <script>
     let form = document.getElementById('myform');
-
+    const csrf = document.getElementsByName('csrfmiddlewaretoken');
     form.addEventListener('submit', sendChat)
 
     function sendChat(e){
         e.preventDefault()
         let chatMessage = document.getElementById('id_body').value
-        console.log(chatMessage);
+        document.getElementById('id_body').value = "";
+        const data = {};
+        data["csrfmiddlewaretoken"] = csrf[0].value;
+        data["msg"] = chatMessage;
+        const urlsend = "{% url 'send_msg' friend.profile.id %}";
+        $.ajax({
+            url: urlsend,
+            type: 'POST',
+            data: data,
+            success: function(res) {
+                let chat_body = document.getElementById('chat-body');
+                let chatMessageBox = document.createElement("div");
+                chatMessageBox.classList.add('chat-box-sent');
+                chatMessageBox.innerText = res.result;
+                chat_body.append(chatMessageBox);
+            },
+            error: function(er) {
+                console.log(er);
+            }
+        });
     }
 </script>
 
